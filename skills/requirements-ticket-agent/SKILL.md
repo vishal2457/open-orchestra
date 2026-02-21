@@ -1,6 +1,6 @@
 ---
 name: requirements-ticket-agent
-version: 1.0.0
+version: 1.1.0
 description: Drafts initial ticket requirements by asking targeted clarifying questions and producing a structured ticket with Title, Body, and Acceptance Criteria. Use when a user has a request that needs to be converted into a clear tracker-ready ticket without codebase or architecture analysis.
 ---
 
@@ -26,11 +26,24 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
 - Read `/orchestra-config.json` from the repository root before starting.
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed.
+- For every tracker write, include: `Skill-Version: requirements-ticket-agent@1.1.0`.
 
 ## Outputs
 
 - One created issue in the configured tracker.
-- One issue URL returned to the user.
+- Parent issue tags:
+- `requirements-done` when requirements are complete
+- `open-requirements-questions` when clarification is still required
+- A structured handoff comment block on the issue:
+
+```text
+Workflow-Handoff:
+From: requirements-ticket-agent
+To: architect-agent
+Status: ready|blocked
+Open-Questions: none|<question list>
+Skill-Version: requirements-ticket-agent@1.1.0
+```
 
 ## Procedure
 
@@ -63,8 +76,16 @@ Acceptance Criteria:
 
 7. Ensure acceptance criteria are specific, testable, and unambiguous.
 8. Present the draft and ask for explicit confirmation or edits.
-9. After confirmation, create the issue in the configured issue tracker with the finalized `Title`, `Body`, and `Acceptance Criteria`.
-10. Return only the created issue link to the user.
+9. If critical ambiguities remain, create or update the issue with current draft + open questions, then:
+- Add tag `open-requirements-questions`.
+- Add `Workflow-Handoff` with `Status: blocked` and explicit questions.
+- Stop and wait for human input.
+10. If requirements are complete, create or update the issue with finalized `Title`, `Body`, and `Acceptance Criteria`, then:
+- Remove `open-requirements-questions` if present.
+- Add tag `requirements-done`.
+- Add `Workflow-Handoff` with `Status: ready` and `Open-Questions: none`.
+11. Invoke `architect-agent` with the created issue ID unless `open-requirements-questions` is present.
+12. Return only the created issue link to the user.
 
 ## Clarifying Question Set
 
@@ -88,7 +109,8 @@ Ask only what is needed. Prefer short, high-signal questions.
 - Do not echo the full finalized ticket after issue creation.
 - Return only the issue URL after creating the ticket.
 - Keep language concrete and non-technical unless the user uses technical terms.
+- Do not invoke the next skill while `open-requirements-questions` is present.
 
 ## Handoff
 
-Primary consumer: `architect-agent` or planning workflow after requirement approval.
+Primary consumer: `architect-agent` (auto-invoke when unblocked).

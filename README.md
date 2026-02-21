@@ -16,6 +16,7 @@ The goal is to make issue execution consistent, auditable, and fast.
 ## Available Skills (One-Line Each)
 
 - `init-architect`: Builds a project `ARCHITECTURE.md` map and supporting architecture reference docs for downstream agents.
+- `architect-agent`: Template Architect Agent skill populated by `init-architect` with project-specific technical analysis context.
 - `qa-agent`: Creates a Linear `qa-plan` subtask with ticket-native test cases from functional and technical requirements.
 - `planning-agent`: Converts approved technical details into implementation-only subtasks and parent issue story points.
 - `implementation-agent`: Implements `implement` subtasks in sequence, updates Linear status/tags, and records build/lint outcomes.

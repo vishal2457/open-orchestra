@@ -44,7 +44,7 @@ The goal is a living document — concise, opinionated, and scoped to what agent
 
 - `ARCHITECTURE.md` written to the repository root — the index, fast to read
 - `docs/arch/*.md` — one reference file per complex domain, linked from the index
-- `skills/architect/SKILL.md` — a project-specific Architect Agent skill, pre-configured with this project's domains, sensitive areas, and reference file paths baked in — no generic placeholders
+- `skills/architect-agent/SKILL.md` — a project-specific Architect Agent skill, pre-configured with this project's domains, sensitive areas, and reference file paths baked in — no generic placeholders
 - A brief terminal summary of what was discovered, which reference files were created, and any ambiguities flagged
 ---
 
@@ -282,7 +282,7 @@ Post these as **Open Questions** in the `ARCHITECTURE.md` so a human can answer 
 
 ### Step 9 — Generate the Architect Agent skill
 
-Using everything discovered in this run, generate a project-specific Architect Agent skill at `skills/architect/SKILL.md`.
+Using everything discovered in this run, generate a project-specific Architect Agent skill at `skills/architect-agent/SKILL.md`.
 
 This is not a generic template. It must have the actual project domains, actual sensitive area paths, and actual reference file paths baked in. An agent running this skill on a ticket should never have to figure out what domains exist or which reference files are available — that work was done here.
 
@@ -457,7 +457,7 @@ The output is good if:
 - The PR Review Agent knows exactly which files trigger a human review gate
 - A new developer would understand the system's structure in under 5 minutes of reading the index
 - No section in `ARCHITECTURE.md` exceeds 8–10 lines — anything longer was moved to a reference file
-- The generated `.claude/skills/architect/SKILL.md` contains no generic placeholders — every domain, path, and sensitive area is specific to this project
+- The generated `skills/architect-agent/SKILL.md` contains no generic placeholders — every domain, path, and sensitive area is specific to this project
 
 It is not good if:
 - The index contains detail that belongs in a reference file

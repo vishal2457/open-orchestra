@@ -1,10 +1,11 @@
-# openIT
+# Open Orchestra
 
-`openIT` is a skill pack for Codex-style agents that run a ticket-driven software delivery workflow from planning to PR review and issue closure.
+`Open Orchestra` is a skill pack for agents that run a ticket-driven software delivery workflow from planning to PR review and issue closure.
 
 ## What This Repo Does
 
-This repository stores reusable agent skills in `skills/*/SKILL.md`.
+This repository stores reusable agent skills in `skills/*/SKILL.md`. Our core philosophy is to implement AI agents in a way that models how a development team works around software tools in an agile environment. By defining and following every step of the software organization's lifecycle, we can successfully scale agentic development workflows in larger projects and across bigger teams.
+
 Each skill defines:
 - when it should run
 - required inputs

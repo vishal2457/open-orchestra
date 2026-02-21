@@ -1,6 +1,6 @@
 ---
 name: planning-agent
-version: 1.0.0
+version: 1.1.0
 description: Creates implementation-only tracker subtasks from `technical-details`, enforces planning preconditions, and assigns story points at the parent issue level.
 ---
 
@@ -16,7 +16,7 @@ Prepare implementation-only subtasks in the configured issue tracker so the impl
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every created subtask/comment/tag/status update, include: `Skill-Version: planning-agent@1.0.0`.
+- For every created subtask/comment/tag/status update, include: `Skill-Version: planning-agent@1.1.0`.
 
 ## When to Invoke
 
@@ -42,10 +42,10 @@ Prepare implementation-only subtasks in the configured issue tracker so the impl
 - Implementation notes needed to write code from `technical-details`
 - One story-point tag applied to the parent issue only, from:
 - `story-point-2`, `story-point-3`, `story-point-5`, `story-point-8`, `story-point-13`
-- Parent issue tag `human-review-required` when issue story points are greater than 3
+- Parent issue tag `human-review-required` when issue story points are `8` or `13`
 - Parent issue tag `planning-done` after planning is completed
 - Parent issue status set to `in-progress` after planning is completed
-- Parent issue comment summarizing created subtasks, full-scope coverage, total issue scope, and risks
+- Parent issue comment with a concise planning summary (counts, score, key risks only)
 
 ## Procedure
 
@@ -59,8 +59,8 @@ Prepare implementation-only subtasks in the configured issue tracker so the impl
 8. Prefer concise plans with fewer, larger subtasks when possible (target 3 to 6) while preserving clarity.
 9. Create each subtask in the configured issue tracker with objective, scope, implementation notes, and referenced files/modules.
 10. Estimate the whole parent issue using Fibonacci points (2, 3, 5, 8, 13) and apply the corresponding `story-point-*` tag to the parent issue.
-11. Add `human-review-required` on the parent issue if the issue score is 5, 8, or 13.
-12. Add a short parent issue planning summary comment with cumulative coverage statement, and risk notes.
+11. Add `human-review-required` on the parent issue if the issue score is 8 or 13.
+12. Add a short parent issue planning summary comment with scope coverage statement and key risk notes only; do not list every subtask.
 13. Add tag `planning-done` and set parent issue status to `in-progress`.
 
 ## Story Pointing Rules (Parent Issue Only)
@@ -85,6 +85,7 @@ Prepare implementation-only subtasks in the configured issue tracker so the impl
 - If `qa-plan` task is missing, add a blocking comment on the parent issue and stop.
 - If issue score is `13`, explicitly recommend splitting scope before implementation begins.
 - Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Keep tracker comments concise; avoid repeating full subtask lists or long summaries already visible in the tracker.
 
 ## Handoff
 

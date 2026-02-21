@@ -1,6 +1,6 @@
 ---
 name: implementation-agent
-version: 1.0.0
+version: 1.1.0
 description: Implements tracker subtasks tagged `implement` in sequence, updates task statuses, runs build/lint checks, and reports completion on the parent issue.
 ---
 
@@ -16,7 +16,7 @@ Implement the parent issue by executing planned implementation subtasks one by o
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every task/comment/status update written to the tracker, include: `Skill-Version: implementation-agent@1.0.0`.
+- For every task/comment/status update written to the tracker, include: `Skill-Version: implementation-agent@1.1.0`.
 
 ## When to Invoke
 
@@ -37,7 +37,7 @@ Implement the parent issue by executing planned implementation subtasks one by o
 - Git branch created as: `<issue-id>-<short-description>`
 - Each completed subtask marked done in the configured issue tracker
 - Comment on each incomplete subtask explaining why it was not completed
-- Build and lint command results recorded in the configured issue tracker
+- Build and lint outcomes recorded in the configured issue tracker as command + pass/fail, with short error excerpts only when failing
 - Parent issue comment with a short implementation summary
 - Parent issue tag `implemented` added
 
@@ -53,8 +53,9 @@ Implement the parent issue by executing planned implementation subtasks one by o
 8. If a subtask cannot be completed, add a subtask comment with the blocker, impact, and next action.
 9. Detect project build and lint commands from repository config (for example `package.json`, `Makefile`, or equivalent).
 10. Run build and lint commands after implementation is complete.
-11. Post a short parent-issue summary.
-12. Add parent tag `implemented`.
+11. Record build/lint results as concise status entries. Include output excerpts only for failures and keep excerpts short.
+12. Post a short parent-issue summary.
+13. Add parent tag `implemented`.
 
 ## Guardrails
 
@@ -63,6 +64,7 @@ Implement the parent issue by executing planned implementation subtasks one by o
 - Do not change scope outside planned subtasks without explicit tracker approval.
 - Do not leave incomplete subtasks without a blocker comment.
 - Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Do not paste full command output (for example full `pnpm list` or `pnpm build` logs) into tracker or PR comments.
 
 ## Handoff
 

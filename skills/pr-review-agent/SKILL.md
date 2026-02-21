@@ -1,6 +1,6 @@
 ---
 name: pr-review-agent
-version: 1.1.0
+version: 1.2.0
 description: Reviews PR changes against issue technical details and acceptance criteria, then posts concise outcomes to PR and issue tracker.
 ---
 
@@ -16,7 +16,7 @@ Run a focused PR review that checks only implemented changes against ticket cont
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every tracker comment/status update, include: `Skill-Version: pr-review-agent@1.1.0`.
+- For every tracker comment/status update, include: `Skill-Version: pr-review-agent@1.2.0`.
 
 ## When to Invoke
 
@@ -73,6 +73,7 @@ Run a focused PR review that checks only implemented changes against ticket cont
 - Prioritize correctness and functional risk over stylistic preferences.
 - Keep findings actionable and tied to specific changed files.
 - Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Keep PR and tracker comments concise; do not paste raw command logs (including `pnpm list`/`pnpm build` output dumps).
 
 ## Handoff
 

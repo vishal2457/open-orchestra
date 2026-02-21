@@ -1,6 +1,6 @@
 ---
 name: qa-agent
-version: 1.0.0
+version: 1.1.0
 description: Creates a QA planning subtask in the configured issue tracker tagged `qa-plan`, with test cases derived only from the ticket's functional and technical requirements.
 ---
 
@@ -16,7 +16,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@1.0.0`.
+- For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@1.1.0`.
 
 ## When to Invoke
 
@@ -38,7 +38,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Edge and failure cases
 - Non-functional checks relevant to ticket scope
 - Clear pass/fail expectations per test case
-- Parent ticket comment linking the QA subtask and confirming QA planning completion
+- Parent ticket comment linking the QA subtask and confirming QA planning completion in 1-2 lines
 
 ## Procedure
 
@@ -49,7 +49,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 5. Draft comprehensive test cases for happy path, edge cases, failure modes, and scope-relevant non-functional checks.
 6. Create a subtask titled `QA Plan: <parent issue title>` and apply tag `qa-plan`.
 7. Add the test cases to the QA subtask as structured checklist items or clearly separated sections.
-8. Add a parent-issue comment linking the QA subtask and hand off to `pre-implementation-agent`.
+8. Add a concise parent-issue comment linking the QA subtask and hand off to `pre-implementation-agent`.
 9. Add a tag qa-plan-created to the parent ticket.
 
 ## Guardrails
@@ -62,6 +62,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - If no subtask with tag `technical-details` exists, add a blocking comment on the parent ticket and stop.
 - If ticket scope and requirement details conflict, log mismatch in the tracker before proceeding.
 - Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Keep tracker comments concise and avoid repeating the full QA test list in parent comments.
 
 ## Handoff
 

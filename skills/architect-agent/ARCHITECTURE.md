@@ -37,7 +37,7 @@ _To be filled by `init-architect`._
 
 ## Reference Docs
 
-_To be filled by `init-architect` with files under `/skills/architect-agent/docs/`._
+_To be filled by `init-architect` with files under `skills/architect-agent/docs/`._
 
 ## Open Questions
 

@@ -15,6 +15,22 @@ Each skill defines:
 
 The goal is to make issue execution consistent, auditable, and fast.
 
+## Tracker Audit Trail Contract
+
+All tracker-writing skills must leave an explicit audit trail. A run is incomplete unless all items below are present:
+
+- Rich artifact content (issue/subtask body), not title-only updates.
+- `Reasoning` section that explains why the agent chose the proposed scope/plan.
+- `References` section listing exact inputs used (ticket fields, child tasks, files, PR links, commands when relevant).
+- `Assumptions` section with unresolved unknowns and inferred decisions.
+- Parent issue comment named `Execution-Trace` with:
+  - actions performed (in order),
+  - key decisions,
+  - blockers/open questions,
+  - `Skill-Version` stamp.
+
+If any required section is missing, the skill must add a correction comment and keep the issue in blocked/open-questions state instead of marking the stage done.
+
 ## Available Skills
 
 - `init-architect`: Manually initializes or refreshes architecture artifacts under `architecture/` while preserving templates under `skills/init-architect/`.

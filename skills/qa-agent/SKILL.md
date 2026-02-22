@@ -1,6 +1,6 @@
 ---
 name: qa-agent
-version: 1.2.0
+version: 1.3.0
 description: Creates a QA planning subtask in the configured issue tracker tagged `qa-plan`, with test cases derived only from the ticket's functional and technical requirements.
 ---
 
@@ -16,7 +16,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@1.2.0`.
+- For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@1.3.0`.
 
 ## When to Invoke
 
@@ -39,6 +39,10 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Edge and failure cases
 - Non-functional checks relevant to ticket scope
 - Clear pass/fail expectations per test case
+- QA subtask body also includes:
+- `Reasoning` (why these tests cover the risk profile)
+- `References` (parent acceptance criteria + `technical-details` links/IDs)
+- `Assumptions` (unknowns and deferred checks)
 - Parent issue tags:
 - `qa-done` when QA planning is complete
 - `open-qa-questions` when QA planning is blocked
@@ -50,7 +54,24 @@ From: qa-agent
 To: planning-agent
 Status: ready|blocked
 Open-Questions: none|<question list>
-Skill-Version: qa-agent@1.2.0
+Skill-Version: qa-agent@1.3.0
+```
+
+- Parent issue `Execution-Trace` comment:
+
+```text
+Execution-Trace:
+Actions:
+1. <action>
+2. <action>
+Decisions:
+- <coverage decision + reason>
+References:
+- <source artifact>
+Assumptions:
+- <assumption>
+Open-Questions: none|<question list>
+Skill-Version: qa-agent@1.3.0
 ```
 
 ## Procedure
@@ -67,11 +88,13 @@ Skill-Version: qa-agent@1.2.0
 9. Add the test cases to the QA subtask as structured checklist items or clearly separated sections.
 10. If ambiguity remains:
 - Add tag `open-qa-questions`.
+- Add `Execution-Trace` comment with blocking test-design ambiguities.
 - Add `Workflow-Handoff` with `Status: blocked`.
 - Stop and wait for clarifications.
 11. If QA plan is complete:
 - Remove `open-qa-questions` if present.
 - Add tag `qa-done`.
+- Add `Execution-Trace` comment summarizing coverage decisions and evidence references.
 - Add `Workflow-Handoff` with `Status: ready` and `Open-Questions: none`.
 12. Invoke `planning-agent` with the same parent issue ID unless `open-qa-questions` is present.
 
@@ -81,6 +104,7 @@ Skill-Version: qa-agent@1.2.0
 - Flag ambiguity as open questions in tracker comments instead of guessing.
 - Separate must-pass checks from optional hardening checks.
 - Do not create `QA_PLAN.md` or any external QA artifact.
+- Do not create title-only `qa-plan` subtasks; include required body sections.
 - Do not read repository code or architecture documents for QA planning.
 - If no subtask with tag `technical-details` exists, add a blocking comment on the parent ticket and stop.
 - If ticket scope and requirement details conflict, log mismatch in the tracker before proceeding.

@@ -1,6 +1,6 @@
 ---
 name: planning-agent
-version: 1.2.0
+version: 1.3.0
 description: Creates implementation-only tracker subtasks from `technical-details`, enforces planning preconditions, and assigns story points at the parent issue level.
 ---
 
@@ -16,7 +16,7 @@ Prepare implementation-only subtasks in the configured issue tracker so the impl
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every created subtask/comment/tag/status update, include: `Skill-Version: planning-agent@1.2.0`.
+- For every created subtask/comment/tag/status update, include: `Skill-Version: planning-agent@1.3.0`.
 
 ## When to Invoke
 
@@ -40,6 +40,9 @@ Prepare implementation-only subtasks in the configured issue tracker so the impl
 - Objective and scope
 - Files/modules to touch
 - Implementation notes needed to write code from `technical-details`
+- Reasoning for decomposition choice
+- References to source artifacts (`technical-details`, `qa-plan`, parent acceptance criteria)
+- Assumptions/unknowns
 - One story-point tag applied to the parent issue only, from:
 - `story-point-2`, `story-point-3`, `story-point-5`, `story-point-8`, `story-point-13`
 - Parent issue tag `human-review-required` when issue story points are `8` or `13`
@@ -54,7 +57,24 @@ From: planning-agent
 To: implementation-agent
 Status: ready|blocked
 Open-Questions: none|<question list>
-Skill-Version: planning-agent@1.2.0
+Skill-Version: planning-agent@1.3.0
+```
+
+- Parent issue `Execution-Trace` comment:
+
+```text
+Execution-Trace:
+Actions:
+1. <action>
+2. <action>
+Decisions:
+- <decomposition or sizing decision + reason>
+References:
+- <source artifact>
+Assumptions:
+- <assumption>
+Open-Questions: none|<question list>
+Skill-Version: planning-agent@1.3.0
 ```
 
 ## Procedure
@@ -69,16 +89,18 @@ Skill-Version: planning-agent@1.2.0
 7. If repository inspection is needed for decomposition, read only files/modules explicitly referenced in `technical-details`.
 8. Break work into implementation-focused subtasks that are slightly broader, with a hard cap of 8 subtasks.
 9. Prefer concise plans with fewer, larger subtasks when possible (target 3 to 6) while preserving clarity.
-10. Create each subtask in the configured issue tracker with objective, scope, implementation notes, and referenced files/modules.
+10. Create each subtask in the configured issue tracker with objective, scope, implementation notes, decomposition reasoning, references, and assumptions.
 11. Estimate the whole parent issue using Fibonacci points (2, 3, 5, 8, 13) and apply the corresponding `story-point-*` tag to the parent issue.
 12. Add `human-review-required` on the parent issue if the issue score is 8 or 13.
 13. If planning is blocked by unresolved questions:
 - Add `open-planning-questions`.
+- Add `Execution-Trace` comment with exact blocking decision points.
 - Add `Workflow-Handoff` with `Status: blocked`.
 - Stop and wait for clarifications.
 14. If planning is complete:
 - Remove `open-planning-questions` if present.
 - Add tag `planning-done` and set parent issue status to `in-progress`.
+- Add `Execution-Trace` comment summarizing sizing and decomposition rationale.
 - Add `Workflow-Handoff` with `Status: ready` and `Open-Questions: none`.
 15. Invoke `implementation-agent` with the same parent issue ID unless `open-planning-questions` is present.
 
@@ -97,6 +119,7 @@ Skill-Version: planning-agent@1.2.0
 - Do not read repository files beyond what is explicitly listed in `technical-details`.
 - Do not apply story-point tags to subtasks.
 - Do not create more than 8 subtasks for a single parent issue.
+- Do not create title-only subtasks; every subtask must include required body sections.
 - Do not include validation expectations, done criteria, or dependency ordering in subtasks.
 - Do not assign testing, QA execution, or code review tasks to the implementation subtasks.
 - Ensure subtasks cumulatively cover 100% of the parent issue scope.

@@ -1,6 +1,6 @@
 ---
 name: requirements-ticket-agent
-version: 1.1.0
+version: 1.2.0
 description: Drafts initial ticket requirements by asking targeted clarifying questions and producing a structured ticket with Title, Body, and Acceptance Criteria. Use when a user has a request that needs to be converted into a clear tracker-ready ticket without codebase or architecture analysis.
 ---
 
@@ -26,14 +26,39 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
 - Read `/orchestra-config.json` from the repository root before starting.
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed.
-- For every tracker write, include: `Skill-Version: requirements-ticket-agent@1.1.0`.
+- For every tracker write, include: `Skill-Version: requirements-ticket-agent@1.2.0`.
 
 ## Outputs
 
 - One created issue in the configured tracker.
+- Issue body must include:
+- `Context`
+- `Goal/Value`
+- `Scope`
+- `Constraints`
+- `Reasoning`
+- `References`
+- `Assumptions`
 - Parent issue tags:
 - `requirements-done` when requirements are complete
 - `open-requirements-questions` when clarification is still required
+- A parent issue `Execution-Trace` comment block:
+
+```text
+Execution-Trace:
+Actions:
+1. <action>
+2. <action>
+Decisions:
+- <decision + reason>
+References:
+- <source>
+Assumptions:
+- <assumption>
+Open-Questions: none|<question list>
+Skill-Version: requirements-ticket-agent@1.2.0
+```
+
 - A structured handoff comment block on the issue:
 
 ```text
@@ -42,7 +67,7 @@ From: requirements-ticket-agent
 To: architect-agent
 Status: ready|blocked
 Open-Questions: none|<question list>
-Skill-Version: requirements-ticket-agent@1.1.0
+Skill-Version: requirements-ticket-agent@1.2.0
 ```
 
 ## Procedure
@@ -63,10 +88,22 @@ Skill-Version: requirements-ticket-agent@1.1.0
 Title: <clear outcome-oriented title>
 
 Body:
+Context:
 <context/problem>
+Goal/Value:
 <goal/value>
-<scope and constraints>
-<assumptions/dependencies>
+Scope:
+<in-scope and out-of-scope>
+Constraints:
+<constraints/dependencies>
+Reasoning:
+<why this scope and acceptance criteria satisfy the request>
+References:
+- <user request>
+- <clarifying answer #1>
+- <clarifying answer #2>
+Assumptions:
+- <explicit assumptions and unknowns>
 
 Acceptance Criteria:
 1. <testable condition>
@@ -78,11 +115,13 @@ Acceptance Criteria:
 8. Present the draft and ask for explicit confirmation or edits.
 9. If critical ambiguities remain, create or update the issue with current draft + open questions, then:
 - Add tag `open-requirements-questions`.
+- Add `Execution-Trace` comment with explicit missing information and why it blocks progress.
 - Add `Workflow-Handoff` with `Status: blocked` and explicit questions.
 - Stop and wait for human input.
 10. If requirements are complete, create or update the issue with finalized `Title`, `Body`, and `Acceptance Criteria`, then:
 - Remove `open-requirements-questions` if present.
 - Add tag `requirements-done`.
+- Add `Execution-Trace` comment summarizing clarifications received and final decision rationale.
 - Add `Workflow-Handoff` with `Status: ready` and `Open-Questions: none`.
 11. Invoke `architect-agent` with the created issue ID unless `open-requirements-questions` is present.
 12. Return only the created issue link to the user.
@@ -106,6 +145,7 @@ Ask only what is needed. Prefer short, high-signal questions.
 - Do not propose technical solutions unless the user explicitly asks.
 - Do not invent requirements; mark unknowns and ask.
 - Do not finalize the ticket until critical ambiguities are resolved.
+- Do not accept title-only or placeholder issue bodies.
 - Do not echo the full finalized ticket after issue creation.
 - Return only the issue URL after creating the ticket.
 - Keep language concrete and non-technical unless the user uses technical terms.

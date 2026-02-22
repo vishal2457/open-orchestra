@@ -113,3 +113,7 @@ openIT/
 - Each skill carries a `version` and stamps `Skill-Version: <skill-name>@<version>` in tracker artifacts for traceability.
 - Some skills also expect Git and GitHub CLI (`gh`) access for branch/PR operations.
 - If your team process differs, edit each `SKILL.md` guardrail/procedure to match your policy.
+
+## Documentation
+
+- Workflow token estimate checkpoints: [`docs/workflow-token-estimates.md`](docs/workflow-token-estimates.md)

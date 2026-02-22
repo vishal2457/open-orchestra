@@ -1,7 +1,7 @@
 ---
 name: pr-review-agent
-version: 1.3.0
-description: Reviews PR changes against issue technical details and acceptance criteria, posts concise outcomes to PR and issue tracker, and routes autonomous next steps.
+version: 1.4.0
+description: Reviews PR changes against issue technical details and acceptance criteria, identifies architecture-impacting changes, posts concise outcomes, and routes autonomous next steps.
 ---
 
 # PR Review Agent
@@ -16,7 +16,7 @@ Run a focused PR review that checks only implemented changes against ticket cont
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every tracker comment/status update, include: `Skill-Version: pr-review-agent@1.3.0`.
+- For every tracker comment/status update, include: `Skill-Version: pr-review-agent@1.4.0`.
 
 ## When to Invoke
 
@@ -30,6 +30,7 @@ Run a focused PR review that checks only implemented changes against ticket cont
 - Issue summary
 - Acceptance criteria
 - `technical-details` subtask content
+- Existing architecture index path: `/architecture/architecture.md`
 
 ## Outputs
 
@@ -42,6 +43,8 @@ Run a focused PR review that checks only implemented changes against ticket cont
 - Status update:
 - `In Progress` when changes are required
 - `Done` when changes are acceptable
+- Optional invocation:
+- `init-architect` with scoped context when architecture-impacting changes are detected
 - Parent issue tags:
 - `pr-reviewed` when review is clean
 - `open-pr-review-questions` when review is blocked by missing context
@@ -53,7 +56,7 @@ From: pr-review-agent
 To: implementation-agent|none
 Status: ready|blocked|completed
 Open-Questions: none|<question list>
-Skill-Version: pr-review-agent@1.3.0
+Skill-Version: pr-review-agent@1.4.0
 ```
 
 ## Procedure
@@ -72,33 +75,50 @@ Skill-Version: pr-review-agent@1.3.0
    - alignment with `technical-details`
    - acceptance criteria coverage
    - pattern consistency with the technical details
-7. Do not over-engineer:
+7. In the same PR review pass, detect architecture-impacting changes from the full PR diff. Treat architecture impact as `true` when one or more of these cases is present:
+   - API contract changes (new/removed/changed endpoints, request/response models, SDK/public interface changes)
+   - Data model or migration changes (schema, indexes, persistence contracts, major query-path shifts)
+   - Service/module boundary changes (new core components, responsibility shifts, cross-module call flow changes)
+   - Integration/event flow changes (external systems, queues/topics/events, webhook contracts)
+   - Authn/authz/session/security boundary changes
+   - Runtime/infrastructure behavior changes that alter system topology or critical operational flows
+8. If architecture impact is `true`, prepare a scoped invocation payload for `init-architect`:
+   - parent issue ID
+   - PR identifier/link
+   - changed files list
+   - concise diff summary
+   - matched architecture-impact cases
+   - suggested architecture doc sections to update
+9. Do not over-engineer:
    - avoid unnecessary optimizations or style-only nits
    - report only issues that can cause bugs, regressions, broken behavior, or criteria mismatch
-8. Post a short PR comment with:
+10. Post a short PR comment with:
    - overall result (`changes required` or `looks good`)
    - concise findings list (or explicit `no blocking issues found`)
-9. Post a short issue tracker comment with the same outcome summary and key findings.
-10. If review is blocked by missing context (for example unclear acceptance criteria or missing technical details):
+   - architecture impact result (`architecture update required` or `no architecture update required`)
+11. Post a short issue tracker comment with the same outcome summary and key findings.
+12. If review is blocked by missing context (for example unclear acceptance criteria or missing technical details):
 - Add `open-pr-review-questions`.
 - Add `Workflow-Handoff` with `Status: blocked`.
 - Stop and wait for clarifications.
-11. If required code changes are found and review is not blocked:
+13. If required code changes are found and review is not blocked:
 - Remove `open-pr-review-questions` if present.
 - Set issue status to `In Progress`.
 - Add `Workflow-Handoff` with `To: implementation-agent` and `Status: ready`.
 - Invoke `implementation-agent` with the same parent issue ID.
-12. If no required changes remain:
+14. If no required changes remain:
 - Remove `open-pr-review-questions` if present.
 - Add tag `pr-reviewed`.
 - Set issue status to `Done`.
 - Add `Workflow-Handoff` with `To: none` and `Status: completed`.
-- Do not invoke further skills.
+15. If architecture impact is `true`, invoke `init-architect` with the scoped payload from step 8. This invocation is independent of whether implementation fixes are also required.
+16. If architecture impact is `false`, do not invoke `init-architect`.
 
 ## Guardrails
 
 - Use only: PR changes, issue summary, acceptance criteria, and `technical-details`.
 - Do not read the full repository for this review.
+- Use the full PR diff already in context for architecture-impact detection; do not fetch unrelated repository files.
 - Prioritize correctness and functional risk over stylistic preferences.
 - Keep findings actionable and tied to specific changed files.
 - Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.

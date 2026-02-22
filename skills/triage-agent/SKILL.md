@@ -20,12 +20,14 @@ Classify incoming work into `trivial`, `standard`, or `complex` track and define
 
 ## When to Invoke
 
-- At workflow start for a new parent issue.
+- After a parent issue already exists in the tracker (created manually, by intake automation, or by `requirements-ticket-agent`).
+- At workflow start for an existing parent issue that has not yet been triaged.
 - When scope changes materially and track classification needs refresh.
 
 ## Required Inputs
 
 - Parent issue ID
+- Parent issue with at least baseline context (title + description or equivalent requirements artifact)
 - Current workflow tags/labels on parent issue
 - Latest previous handoff comment (if present)
 
@@ -77,14 +79,31 @@ Classify incoming work into `trivial`, `standard`, or `complex` track and define
 
 1. Read `/orchestra-config.json`, set tracker context, and verify the configured issue tracker MCP is available.
 2. Execute the strict context gathering order above.
-3. Classify track:
+3. Determine readiness route from tags/context:
+- Route to `requirements-ticket-agent` when requirements are missing/ambiguous or `open-requirements-questions` is present.
+- Route to `architect-agent` when requirements are complete (`requirements-done`) and architecture/qa/planning are not yet complete.
+- Route to `planning-agent` only when requirements and architecture context are already sufficient for decomposition (for example, architecture work already done and no open architecture/qa blockers).
+4. Classify track:
 - `trivial`: isolated change, low regression risk, no cross-module impact.
 - `standard`: moderate scope, known patterns, normal implementation/review flow.
 - `complex`: cross-module/API/data contract/security/runtime impact or high ambiguity.
-4. Build `skip_steps` guidance (empty when full standard flow is required).
-5. Keep tags unchanged except normal stage tags already defined by workflow policy.
-6. Post the handoff comment in the exact wrapper format above.
-7. Route to the next skill using existing tag/label triggers and the `next_guidance` payload.
+5. Build `skip_steps` guidance (empty when full standard flow is required). Only skip a stage when required artifacts already exist and no corresponding `open-*-questions` tag is present.
+6. Keep tags unchanged except normal stage tags already defined by workflow policy.
+7. Post the handoff comment in the exact wrapper format above.
+8. Route to the next skill using existing tag/label triggers and the `next_guidance` payload.
+
+## Decision Heuristics
+
+- Complexity signals:
+  - `trivial`: single-component/single-file intent, no API/schema/permission/runtime contract changes, clear acceptance criteria.
+  - `standard`: bounded multi-file change with known pattern reuse, moderate regression surface, no critical contract shifts.
+  - `complex`: cross-service/module coupling, API/schema/contract changes, security/privacy implications, migration/rollout concerns, or unresolved ambiguity.
+- Routing signals:
+  - Prefer `requirements-ticket-agent` if intent is not testable as written.
+  - Prefer `architect-agent` if requirements are testable but implementation design/constraints are not yet captured.
+  - Prefer `planning-agent` only when requirements + technical design artifacts are already stable.
+- Confidence rule:
+  - If confidence is low, mark `status: blocked`, list blockers in `open_blockers`, and avoid aggressive `skip_steps`.
 
 ## Guardrails
 

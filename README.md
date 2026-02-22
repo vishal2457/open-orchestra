@@ -34,6 +34,7 @@ If any required section is missing, the skill must add a correction comment and 
 ## Available Skills
 
 - `init-architect`: Manually initializes or refreshes architecture artifacts under `architecture/` while preserving templates under `skills/init-architect/`.
+- `triage-agent`: Classifies an existing parent issue as `trivial|standard|complex`, suggests `skip_steps`, and routes to the correct next stage.
 - `requirements-ticket-agent`: Converts informal user requests into structured initial tickets by asking clarifying questions and outputting Title, Body, and Acceptance Criteria.
 - `architect-agent`: Reads `architecture/architecture.md` and related `architecture/docs/*.md` files to create a `technical-details` subtask.
 - `qa-agent`: Creates a Linear `qa-plan` subtask with ticket-native test cases from functional and technical requirements.
@@ -46,16 +47,18 @@ If any required section is missing, the skill must add a correction comment and 
 ## Typical Workflow
 
 1. Install skills in the target repository.
-2. Use `requirements-ticket-agent` to turn initial requests into structured requirements.
-3. Run `init-architect` manually (project onboarding or major architecture drift).
-4. Manually kick off the first active stage (`requirements-ticket-agent` for net-new requests, or `architect-agent` for prepared tickets).
-5. `requirements-ticket-agent` auto-invokes `architect-agent` unless requirements questions are open.
-6. `architect-agent` auto-invokes `qa-agent` unless architecture questions are open.
-7. `qa-agent` auto-invokes `planning-agent` unless QA questions are open.
-8. `planning-agent` auto-invokes `implementation-agent` unless planning questions are open.
-9. `implementation-agent` auto-invokes `pr-publish-agent` unless implementation questions are open.
-10. `pr-publish-agent` auto-invokes `pr-review-agent` unless publish questions are open.
-11. `pr-review-agent` loops back to `implementation-agent` when fixes are required, or completes when review is clean.
+2. Create or identify a parent issue.
+3. For net-new requests without a usable parent issue body, run `requirements-ticket-agent` first to create/normalize requirements on the parent issue.
+4. Run `init-architect` manually (project onboarding or major architecture drift).
+5. Run `triage-agent` once a parent issue exists to classify execution track and propose routing.
+6. `triage-agent` routes to `requirements-ticket-agent`, `architect-agent`, or `planning-agent` based on issue readiness/tags.
+7. `requirements-ticket-agent` auto-invokes `architect-agent` unless requirements questions are open.
+8. `architect-agent` auto-invokes `qa-agent` unless architecture questions are open.
+9. `qa-agent` auto-invokes `planning-agent` unless QA questions are open.
+10. `planning-agent` auto-invokes `implementation-agent` unless planning questions are open.
+11. `implementation-agent` auto-invokes `pr-publish-agent` unless implementation questions are open.
+12. `pr-publish-agent` auto-invokes `pr-review-agent` unless publish questions are open.
+13. `pr-review-agent` loops back to `implementation-agent` when fixes are required, or completes when review is clean.
 
 ## Workflow Tag Contract
 

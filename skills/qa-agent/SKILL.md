@@ -1,7 +1,7 @@
 ---
 name: qa-agent
-version: 2.0.0
-description: Creates a QA planning subtask tagged `qa-plan` using handoff-first context loading, lazy artifact reads, and compact JSON handoff output.
+version: 0.0.1
+description: Creates a QA planning subtask tagged `qa-plan` using handoff-first context loading, lazy artifact reads, and compact JSON handoff output. Depends on requirements and planning being done.
 ---
 
 # QA Agent
@@ -16,17 +16,17 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@2.0.0`.
+- For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@0.0.1`.
 
 ## When to Invoke
 
-- After Requirement and Architect Agents finish.
-- Before Planning Agent creates implementation subtasks.
+- After Planning Agent creates implementation subtasks.
+- Before Implementation Agent starts code changes.
 
 ## Required Inputs
 
 - Parent issue ID (source of truth ticket).
-- Parent issue tag `architecture-done`.
+- Parent issue tag `planning-done`.
 - Most recent prior handoff comment in `<!-- OPEN-ORCHESTRA-HANDOFF -->` format.
 
 ## Outputs
@@ -49,7 +49,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 <!-- OPEN-ORCHESTRA-HANDOFF -->
 ```JSON
 {
-  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <coverage decision + reason>\nReferences:\n- <source artifact>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: qa-agent@2.0.0",
+  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <coverage decision + reason>\nReferences:\n- <source artifact>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: qa-agent@0.0.1",
   "handoff_summary": {
     "from_skill": "qa-agent",
     "to_skill": "planning-agent",
@@ -87,23 +87,23 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 ## Procedure
 
 1. Read `/orchestra-config.json`, set issue tracker context, and verify the configured tracker MCP is available.
-2. Validate parent issue has tag `architecture-done`.
+2. Validate parent issue has tag `planning-done`.
 3. Execute the strict context gathering order above.
 4. Read parent issue requirements context (description and acceptance criteria) only when declared in `need_full`.
-5. Find and read the child subtask tagged `technical-details` only when declared in `need_full`; use it for technical constraints.
+5. Find and read the child implementation subtasks tagged `implement` to understand planned technical scope; use them for deriving test constraints.
 6. Translate ticket requirements into explicit testable behaviors.
 7. Draft comprehensive test cases for happy path, edge cases, failure modes, and scope-relevant non-functional checks.
 8. Create a subtask titled `QA Plan: <parent issue title>` and apply tag `qa-plan`.
 9. Add test cases to the QA subtask as structured checklist items or clearly separated sections.
 10. If ambiguity remains:
-- Add tag `open-qa-questions`.
-- Post handoff JSON with `status: blocked` and explicit `open_blockers`.
-- Stop and wait for clarifications.
+    - Add tag `open-qa-questions`.
+    - Post handoff JSON with `status: blocked` and explicit `open_blockers`.
+    - Stop and wait for clarifications.
 11. If QA plan is complete:
-- Remove `open-qa-questions` if present.
-- Add tag `qa-done`.
-- Post handoff JSON with `status: ready` and no blockers.
-12. Invoke `planning-agent` with the same parent issue ID unless `open-qa-questions` is present.
+    - Remove `open-qa-questions` if present.
+    - Add tag `qa-done`.
+    - Post handoff JSON with `status: ready` and no blockers.
+12. QA is informational; implementation continues from `implementation-agent`. Optionally notify the implementation agent that QA expectations are available.
 
 ## Guardrails
 
@@ -112,8 +112,8 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Separate must-pass checks from optional hardening checks.
 - Do not create `QA_PLAN.md` or any external QA artifact.
 - Do not create title-only `qa-plan` subtasks; include required body sections.
-- Do not read repository code or architecture documents for QA planning.
-- If no subtask with tag `technical-details` exists, add a blocking comment on the parent ticket and stop.
+- Do not read repository code files for QA planning.
+- If no implementation subtasks tagged `implement` exist, add a blocking comment on the parent ticket and stop.
 - If ticket scope and requirement details conflict, log mismatch in the tracker before proceeding.
 - Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
 - Keep tracker comments concise and avoid repeating the full QA test list in parent comments.
@@ -121,4 +121,4 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 
 ## Handoff
 
-Primary consumer: `planning-agent` (auto-invoke when unblocked).
+QA planning is a parallel quality gate. It does not block implementation; `implementation-agent` is the primary downstream consumer via the `planning-done` tag.

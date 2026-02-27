@@ -1,6 +1,6 @@
 ---
 name: requirements-ticket-agent
-version: 2.0.0
+version: 0.0.1
 description: Drafts initial ticket requirements by asking targeted clarifying questions and producing a structured ticket with handoff-first context loading, lazy artifact reads, and compact JSON handoff output.
 ---
 
@@ -25,9 +25,11 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
 ## Runtime Configuration
 
 - Read `/orchestra-config.json` from the repository root before starting.
+- If `/orchestra-config.json` is missing, create it at repository root with:
+  - `{ "issue_tracker": "linear" }`
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed.
-- For every tracker write, include: `Skill-Version: requirements-ticket-agent@2.0.0`.
+- For every tracker write, include: `Skill-Version: requirements-ticket-agent@0.0.1`.
 
 ## Outputs
 
@@ -48,10 +50,10 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
 <!-- OPEN-ORCHESTRA-HANDOFF -->
 ```JSON
 {
-  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <decision + reason>\nReferences:\n- <source>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: requirements-ticket-agent@2.0.0",
+  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <decision + reason>\nReferences:\n- <source>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: requirements-ticket-agent@0.0.1",
   "handoff_summary": {
     "from_skill": "requirements-ticket-agent",
-    "to_skill": "architect-agent",
+    "to_skill": "planning-agent",
     "status": "ready|blocked",
     "delta": ["<what changed in requirements state>"],
     "key_decisions": [{"decision": "<decision>", "reason": "<reason>"}],
@@ -66,7 +68,7 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
     "open_blockers": [{"blocker": "<text>", "owner": "<owner>", "next_action": "<action>"}],
     "next_guidance": {
       "need_full": ["<artifact names to fully read next>"],
-      "focus": ["<highest-priority architecture clarifications>"]
+      "focus": ["<highest-priority requirements clarifications for planning>"]
     }
   }
 }
@@ -133,10 +135,10 @@ Acceptance Criteria:
 - Post handoff JSON with `status: blocked` and explicit `open_blockers`.
 - Stop and wait for human input.
 12. If requirements are complete:
-- Remove `open-requirements-questions` if present.
-- Add tag `requirements-done`.
-- Post handoff JSON with `status: ready` and no blockers.
-13. Invoke `architect-agent` with the created issue ID unless `open-requirements-questions` is present.
+    - Remove `open-requirements-questions` if present.
+    - Add tag `requirements-done`.
+    - Post handoff JSON with `status: ready` and no blockers.
+13. Invoke `planning-agent` with the created issue ID unless `open-requirements-questions` is present.
 14. Return only the created issue link to the user.
 
 ## Clarifying Question Set
@@ -167,4 +169,4 @@ Ask only what is needed. Prefer short, high-signal questions.
 
 ## Handoff
 
-Primary consumer: `architect-agent` (auto-invoke when unblocked).
+Primary consumer: `planning-agent` (auto-invoke when unblocked).

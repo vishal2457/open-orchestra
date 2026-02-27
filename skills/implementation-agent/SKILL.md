@@ -1,6 +1,6 @@
 ---
 name: implementation-agent
-version: 2.1.0
+version: 0.0.1
 description: Implements tracker subtasks tagged `implement`, publishes/updates the PR, and routes review using handoff-first context loading, lazy artifact reads, and rework_mode support.
 ---
 
@@ -16,7 +16,7 @@ Implement the parent issue by executing planned implementation subtasks and hand
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every task/comment/status update written to the tracker, include: `Skill-Version: implementation-agent@2.1.0`.
+- For every task/comment/status update written to the tracker, include: `Skill-Version: implementation-agent@0.0.1`.
 - Immediately stop if `gh` CLI is unavailable.
 
 ## When to Invoke
@@ -51,7 +51,7 @@ Implement the parent issue by executing planned implementation subtasks and hand
 <!-- OPEN-ORCHESTRA-HANDOFF -->
 ```JSON
 {
-  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <decision + reason>\nReferences:\n- <source artifact or command>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: implementation-agent@2.1.0",
+  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <decision + reason>\nReferences:\n- <source artifact or command>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: implementation-agent@0.0.1",
   "handoff_summary": {
     "from_skill": "implementation-agent",
     "to_skill": "pr-review-agent",

@@ -1,6 +1,6 @@
 ---
 name: pr-review-agent
-version: 2.0.0
+version: 0.0.1
 description: Runs a diff-first PR review with handoff-first context loading, lazy spec extraction, architecture-impact detection, and compact review-to-implementation findings handoff.
 ---
 
@@ -16,7 +16,7 @@ Run a focused PR review that starts from changed code, validates only relevant r
 - Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
 - Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
 - If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
-- For every tracker comment/status update, include: `Skill-Version: pr-review-agent@2.0.0`.
+- For every tracker comment/status update, include: `Skill-Version: pr-review-agent@0.0.1`.
 
 ## When to Invoke
 
@@ -50,7 +50,7 @@ Run a focused PR review that starts from changed code, validates only relevant r
 <!-- OPEN-ORCHESTRA-HANDOFF -->
 ```JSON
 {
-  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <review decision + reason>\nReferences:\n- <PR diff or requirement artifact>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: pr-review-agent@2.0.0",
+  "execution_trace": "Execution-Trace:\nActions:\n1. <action>\n2. <action>\nDecisions:\n- <review decision + reason>\nReferences:\n- <PR diff or requirement artifact>\nAssumptions:\n- <assumption>\nOpen-Questions: none|<question list>\nSkill-Version: pr-review-agent@0.0.1",
   "handoff_summary": {
     "from_skill": "pr-review-agent",
     "to_skill": "implementation-agent|none",

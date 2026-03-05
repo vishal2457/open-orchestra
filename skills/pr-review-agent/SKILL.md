@@ -12,10 +12,10 @@ Run a focused PR review that starts from changed code, validates only relevant r
 
 ## Runtime Configuration
 
-- Read `/orchestra-config.json` from the repository root before starting.
-- Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
-- Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
-- If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
+- Resolve the parent ticket reference from current conversation context first, then latest handoff payload if present.
+- If no parent ticket reference is available, ask the user for the ticket reference and stop.
+- Use the available issue tracker MCP directly for ticket operations.
+- If the required issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
 - For every tracker comment/status update, include: `Skill-Version: pr-review-agent@0.0.1`.
 
 ## When to Invoke
@@ -99,7 +99,7 @@ Run a focused PR review that starts from changed code, validates only relevant r
 
 ## Procedure (Diff-First)
 
-1. Read `/orchestra-config.json`, set tracker context, and verify the configured issue tracker MCP is available.
+1. Resolve the parent ticket reference from context and verify the required issue tracker MCP is available.
 2. Validate parent issue has tag `pr-published`.
 3. Execute the strict context gathering order above.
 4. Fetch PR diff and changed files first. This is the primary review input.
@@ -155,7 +155,7 @@ Run a focused PR review that starts from changed code, validates only relevant r
 - Use handoff summary first, then lazy-load only required artifact sections.
 - Prioritize correctness and functional risk over stylistic preferences.
 - Keep findings actionable and tied to specific changed files.
-- Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Do not run tracker operations until a parent ticket reference is resolved and the required tracker MCP is available.
 - Keep PR and tracker comments concise; do not paste raw command logs.
 
 ## Handoff

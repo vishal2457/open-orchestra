@@ -19,21 +19,20 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
 ## Required Inputs
 
 - User's initial request (raw problem statement).
-- Access to the configured issue tracker MCP.
+- Access to an available issue tracker MCP.
 - Most recent prior handoff comment in `<!-- OPEN-ORCHESTRA-HANDOFF -->` format when present.
 
 ## Runtime Configuration
 
-- Read `/orchestra-config.json` from the repository root before starting.
-- If `/orchestra-config.json` is missing, create it at repository root with:
-  - `{ "issue_tracker": "linear" }`
-- Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
-- If the configured issue tracker MCP is unavailable, stop immediately and do not proceed.
+- Resolve ticket reference from current conversation context first, then latest handoff payload if present.
+- If no ticket reference is found and the run requires updating an existing ticket, ask the user for the ticket reference and stop.
+- Use the available issue tracker MCP directly for ticket operations.
+- If the required issue tracker MCP is unavailable, stop immediately and do not proceed.
 - For every tracker write, include: `Skill-Version: requirements-ticket-agent@0.0.1`.
 
 ## Outputs
 
-- One created issue in the configured tracker.
+- One created issue in the selected tracker.
 - Issue body must include:
 - `Context`
 - `Goal/Value`
@@ -89,7 +88,7 @@ Convert a user request into a clean, tracker-ready ticket by gathering missing d
 
 ## Procedure
 
-1. Read `/orchestra-config.json` and verify the configured tracker MCP is available.
+1. Resolve ticket reference context (when applicable) and verify the required tracker MCP is available.
 2. Execute the strict context gathering order above. If no previous handoff exists, continue with the user request as baseline.
 3. Restate the request in one concise sentence to confirm scope.
 4. Identify requirement gaps:

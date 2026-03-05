@@ -12,10 +12,10 @@ Implement the parent issue by executing planned implementation subtasks and hand
 
 ## Runtime Configuration
 
-- Read `/orchestra-config.json` from the repository root before starting.
-- Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
-- Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
-- If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
+- Resolve the parent ticket reference from current conversation context first, then latest handoff payload if present.
+- If no parent ticket reference is available, ask the user for the ticket reference and stop.
+- Use the available issue tracker MCP directly for ticket operations.
+- If the required issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
 - For every task/comment/status update written to the tracker, include: `Skill-Version: implementation-agent@0.0.1`.
 - Immediately stop if `gh` CLI is unavailable.
 
@@ -36,11 +36,11 @@ Implement the parent issue by executing planned implementation subtasks and hand
 
 - Code changes implementing all completable `implement` subtasks.
 - Git branch created as: `codex/<issue-id>-<short-description>`.
-- Each completed subtask marked done in the configured issue tracker.
+- Each completed subtask marked done in the active issue tracker.
 - Comment on each incomplete subtask explaining why it was not completed.
-- Build and lint outcomes recorded in the configured issue tracker as command + pass/fail, with short error excerpts only when failing.
+- Build and lint outcomes recorded in the active issue tracker as command + pass/fail, with short error excerpts only when failing.
 - Branch pushed to remote when work is complete.
-- Pull request created (first pass) or updated (rework pass) and linked to the configured tracker issue.
+- Pull request created (first pass) or updated (rework pass) and linked to the tracker issue.
 - Parent issue status moved to `In review` after successful publish/update.
 - Parent issue tags:
 - `implementation-done` when implementation is complete.
@@ -91,7 +91,7 @@ Implement the parent issue by executing planned implementation subtasks and hand
 
 ## Procedure
 
-1. Read `/orchestra-config.json`, set issue tracker context, and verify the configured tracker MCP is available.
+1. Resolve the parent ticket reference from context and verify the required tracker MCP is available.
 2. Execute the strict context gathering order above.
 3. Validate prerequisites: parent issue status is `In-progress` and parent has `planning-done`.
 4. Determine mode:
@@ -129,7 +129,7 @@ Implement the parent issue by executing planned implementation subtasks and hand
 - Do not execute subtasks that are not tagged `implement`.
 - Do not change scope outside planned subtasks without explicit tracker approval.
 - Do not leave incomplete subtasks without a blocker comment.
-- Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Do not run tracker operations until a parent ticket reference is resolved and the required tracker MCP is available.
 - Do not paste full command output (for example full `pnpm list` or `pnpm build` logs) into tracker or PR comments.
 - Do not reconstruct state by reading full comment history; use handoff summary first, then lazy-load only required artifacts.
 - Do not create or update a PR if there are no committed changes from this implementation pass.

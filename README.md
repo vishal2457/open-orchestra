@@ -154,9 +154,9 @@ Every agent writes a `Workflow-Handoff` comment block with a stage-specific head
 
 ## Project Setup
 
-The workflow is designed to be zero-config. When you run any entry-point skill (`requirements-ticket-agent`, `triage-agent`, or `planning-agent`) for the first time in a new repository, it will automatically create a default `/orchestra-config.json` file in the root directory.
+The workflow is designed to be zero-config. Agents resolve the target ticket from current conversation context or the latest workflow handoff comment.
 
-By default, the system assumes you are using **Linear**. To switch to **Jira**, simply edit the `issue_tracker` value in `orchestra-config.json` after it has been created.
+If no ticket reference is available for a ticket-scoped run, the agent asks for the ticket reference and waits before continuing.
 
 ## How To Use These Skills
 
@@ -169,7 +169,6 @@ By default, the system assumes you are using **Linear**. To switch to **Jira**, 
 
 ```text
 openIT/
-  orchestra-config.json
   skills/
     requirements-ticket-agent/
       SKILL.md
@@ -192,8 +191,9 @@ openIT/
 
 ## Notes
 
-- These skills read `orchestra-config.json` for runtime tracker selection (`linear` or `jira`).
-- If the configured tracker MCP is unavailable, the skill must stop and not proceed with tracker operations.
+- These skills no longer depend on `orchestra-config.json`.
+- If a ticket-scoped run has no ticket reference in context, the skill asks for it and stops until provided.
+- If the required tracker MCP is unavailable, the skill must stop and not proceed with tracker operations.
 - Each skill carries a `version` and stamps `Skill-Version: <skill-name>@<version>` in tracker artifacts for traceability.
 - Some skills also expect Git and GitHub CLI (`gh`) access for branch/PR operations.
 - If your team process differs, edit each `SKILL.md` guardrail/procedure to match your policy.

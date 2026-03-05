@@ -12,12 +12,10 @@ Turn a ticket into a concrete, code-grounded Technical Plan subtask and a set of
 
 ## Runtime Configuration
 
-- Read `/orchestra-config.json` from the repository root before starting.
-- If `/orchestra-config.json` is missing, create it at repository root with:
-  - `{ "issue_tracker": "linear" }`
-- Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
-- Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
-- If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
+- Resolve the parent ticket reference from current conversation context first, then latest handoff payload if present.
+- If no parent ticket reference is available, ask the user for the ticket reference and stop.
+- Use the available issue tracker MCP directly for ticket operations.
+- If the required issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
 - For every created subtask/comment/tag/status update, include: `Skill-Version: planning-agent@0.0.1`.
 
 ## When to Invoke
@@ -107,7 +105,7 @@ Read user-provided files first when available. They do not replace codebase insp
 
 ## Procedure
 
-1. Read `/orchestra-config.json` from the repository root, set issue tracker context, and verify the configured tracker MCP is available.
+1. Resolve the parent ticket reference from context and verify the required tracker MCP is available.
 2. Validate prerequisites: parent issue has tag `requirements-done`.
 3. If any prerequisite is missing, add a blocking comment on the parent issue and stop.
 4. Execute the strict context gathering order above.
@@ -126,7 +124,7 @@ Read user-provided files first when available. They do not replace codebase insp
    - Risks, open questions, and assumptions.
 9. Create a Technical Plan subtask under the parent issue with that plan content (do not post the plan as a parent comment).
 10. Break work into implementation-focused subtasks (target 3–6, hard cap 8). Each subtask must be directly derivable from the live code and ticket scope; do not reference architecture documents that do not exist.
-11. Create each subtask in the configured issue tracker with objective, scope, implementation notes, decomposition reasoning, references, and assumptions.
+11. Create each subtask in the active issue tracker with objective, scope, implementation notes, decomposition reasoning, references, and assumptions.
 12. Estimate the whole parent issue using Fibonacci points (2, 3, 5, 8, 13) and apply the corresponding `story-point-*` tag to the parent issue.
 13. Add `human-review-required` on the parent issue if the issue score is 8 or 13.
 14. Technical Plan subtask completion rule:
@@ -161,7 +159,7 @@ Read user-provided files first when available. They do not replace codebase insp
 - Do not assign testing, QA execution, or code review tasks to the implementation subtasks.
 - Ensure subtasks cumulatively cover 100% of the parent issue scope.
 - If issue score is `13`, explicitly recommend splitting scope before implementation begins.
-- Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Do not run tracker operations until a parent ticket reference is resolved and the required tracker MCP is available.
 - Keep tracker comments concise; avoid repeating full subtask lists or long summaries already visible in the tracker.
 - Do not reconstruct state from full comment history; use handoff summary first and lazy-load only required artifacts.
 - The Technical Plan subtask must stay short and precise — its purpose is to orient the implementation agent, not to be an exhaustive document.

@@ -12,10 +12,10 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 
 ## Runtime Configuration
 
-- Read `/orchestra-config.json` from the repository root before starting.
-- Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
-- Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
-- If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
+- Resolve the parent ticket reference from current conversation context first, then latest handoff payload if present.
+- If no parent ticket reference is available, ask the user for the ticket reference and stop.
+- Use the available issue tracker MCP directly for ticket operations.
+- If the required issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
 - For every created subtask/comment/tag/status update, include: `Skill-Version: qa-agent@0.0.1`.
 
 ## When to Invoke
@@ -88,7 +88,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 
 ## Procedure
 
-1. Read `/orchestra-config.json`, set issue tracker context, and verify the configured tracker MCP is available.
+1. Resolve the parent ticket reference from context and verify the required tracker MCP is available.
 2. Validate parent issue has tag `planning-done`.
 3. Execute the strict context gathering order above.
 4. Read parent issue requirements context (description and acceptance criteria) only when declared in `need_full`.
@@ -117,7 +117,7 @@ Turn ticket requirements into a concrete, ticket-native QA test case set before 
 - Do not read repository code files for QA planning.
 - If no implementation subtasks tagged `implement` exist, add a blocking comment on the parent ticket and stop.
 - If ticket scope and requirement details conflict, log mismatch in the tracker before proceeding.
-- Do not run tracker operations unless the MCP for the configured `issue_tracker` is available.
+- Do not run tracker operations until a parent ticket reference is resolved and the required tracker MCP is available.
 - Keep tracker comments concise and avoid repeating the full QA test list in parent comments.
 - Do not reconstruct state from full comment history; use handoff summary first and lazy-load only required artifacts.
 

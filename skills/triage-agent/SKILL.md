@@ -12,12 +12,10 @@ Classify incoming work into `trivial`, `standard`, or `complex` track and define
 
 ## Runtime Configuration
 
-- Read `/orchestra-config.json` from the repository root before starting.
-- If `/orchestra-config.json` is missing, create it at repository root with:
-  - `{ "issue_tracker": "linear" }`
-- Read `issue_tracker` and use only the configured tracker MCP for ticket operations.
-- Use the MCP mapped to `issue_tracker` in `orchestra-config.json`.
-- If the configured issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
+- Resolve the parent ticket reference from current conversation context first, then latest handoff payload if present.
+- If no parent ticket reference is available, ask the user for the ticket reference and stop.
+- Use the available issue tracker MCP directly for ticket operations.
+- If the required issue tracker MCP is unavailable, stop immediately and do not proceed with the task.
 - For every task/comment/status update written to the tracker, include: `Skill-Version: triage-agent@0.0.1`.
 
 ## When to Invoke
@@ -81,7 +79,7 @@ Classify incoming work into `trivial`, `standard`, or `complex` track and define
 
 ## Procedure
 
-1. Read `/orchestra-config.json`, set tracker context, and verify the configured issue tracker MCP is available.
+1. Resolve the parent ticket reference from context and verify the required issue tracker MCP is available.
 2. Execute the strict context gathering order above.
 3. Determine readiness route from tags/context:
    - Route to `requirements-ticket-agent` when requirements are missing/ambiguous or `open-requirements-questions` is present.
@@ -112,6 +110,7 @@ Classify incoming work into `trivial`, `standard`, or `complex` track and define
 - Do not read full issue history by default.
 - Do not read all artifacts by default.
 - Do not modify existing workflow tag contracts.
+- Do not run tracker operations until a parent ticket reference is resolved.
 - Do not emit handoff payloads over 600 tokens.
 
 ## Handoff

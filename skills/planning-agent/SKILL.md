@@ -1,10 +1,27 @@
 ---
 name: planning-agent
 version: 0.0.1
-description: Reads ticket requirements, inspects the live codebase, creates a Technical Plan subtask, and creates implementation subtasks. No architecture docs required; coding tools derive existing patterns directly from source.
+description: Reads a parent issue, inspects the live codebase, creates a Technical Plan subtask, and creates implementation subtasks. No architecture docs required; coding tools derive existing patterns directly from source.
 ---
 
 # Planning Agent
+
+## Open Orchestra Settings
+
+Before doing anything else, look for `orchestra-settings.json` in the current workspace or repository root.
+
+- If the file exists, treat it as the workflow source of truth.
+- Read `workflow.sequence` to understand the expected stage order.
+- Read `workflow.agents.planning-agent` to determine:
+  - `dependsOn`: agents that must be complete before this agent runs.
+  - `next`: the next agent to hand off to.
+  - `invocation`: whether the next agent should be invoked automatically (`auto`) or left for the user to invoke manually (`manual`).
+- If `dependsOn` lists agents that are not complete yet, stop and report that planning is blocked by workflow configuration.
+- When this agent finishes, hand off only to the configured `next` agent.
+- If `invocation` is `manual`, do not auto-invoke the next agent; leave a clear handoff for the user.
+- If the file does not exist, use the built-in default flow:
+  `planning-agent -> implementation-agent -> pr-review-agent`, with automatic handoff from planning to implementation.
+- Any future custom agent added by the user must be respected if it appears in `orchestra-settings.json`; do not assume the core three-agent workflow is exhaustive.
 
 ## Purpose
 
@@ -20,7 +37,7 @@ Turn a ticket into a concrete, code-grounded Technical Plan subtask and a set of
 
 ## When to Invoke
 
-- After requirements are confirmed on the parent issue (`requirements-done`).
+- As the first workflow stage once a parent issue exists.
 - Before Implementation Agent starts code changes.
 
 ## Optional User-Provided Context
@@ -34,8 +51,8 @@ Read user-provided files first when available. They do not replace codebase insp
 ## Required Inputs
 
 - Parent issue ID (source of truth ticket).
-- Parent issue has tag `requirements-done`.
-- Most recent prior handoff comment in `<!-- OPEN-ORCHESTRA-HANDOFF -->` format.
+- Parent issue includes baseline requirements context (description and acceptance criteria).
+- Most recent prior handoff comment in `<!-- OPEN-ORCHESTRA-HANDOFF -->` format, when available.
 
 ## Outputs
 
@@ -106,8 +123,8 @@ Read user-provided files first when available. They do not replace codebase insp
 ## Procedure
 
 1. Resolve the parent ticket reference from context and verify the required tracker MCP is available.
-2. Validate prerequisites: parent issue has tag `requirements-done`.
-3. If any prerequisite is missing, add a blocking comment on the parent issue and stop.
+2. Validate prerequisites: parent issue has baseline requirements context (description and acceptance criteria).
+3. If prerequisites are missing, add tag `open-planning-questions`, add a blocking comment on the parent issue, and stop.
 4. Execute the strict context gathering order above.
 5. Read the parent issue: title, description, and acceptance criteria.
 6. If the user has provided optional context files (architecture docs, design notes, etc.), read them now.
@@ -138,7 +155,7 @@ Read user-provided files first when available. They do not replace codebase insp
     - Remove `open-planning-questions` if present.
     - Add tag `planning-done` and set parent issue status to `in-progress`.
     - Post handoff JSON with `status: ready` and no blockers.
-17. Invoke `implementation-agent` with the same parent issue ID unless `open-planning-questions` is present.
+17. If `open-planning-questions` is not present and `orchestra-settings.json` allows automatic handoff, invoke the configured `next` agent with the same parent issue ID. Otherwise stop after leaving the handoff for the user.
 
 ## Story Pointing Rules (Parent Issue Only)
 
@@ -166,4 +183,4 @@ Read user-provided files first when available. They do not replace codebase insp
 
 ## Handoff
 
-Primary consumer: `implementation-agent` (auto-invoke when unblocked).
+Primary consumer: the `next` agent configured for `planning-agent` in `orchestra-settings.json`; default is `implementation-agent`.

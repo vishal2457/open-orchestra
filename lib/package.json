@@ -1,0 +1,35 @@
+{
+  "name": "open-orch",
+  "version": "0.0.2",
+  "description": "CLI for bootstrapping Open Orchestra workflows",
+  "author": "Vishal Acharya",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/bundle.js",
+  "bin": {
+    "open-orch": "./dist/bundle.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "clean": "rm -rf dist",
+    "dev": "nodemon --exec \"node -r esbuild-register ./src/main.ts\" -e .ts",
+    "lint": "tsc --noEmit && eslint \"src/**/*.ts*\" --max-warnings 0",
+    "start": "node -r esbuild-register ./src/main.ts",
+    "test:watch": "vitest watch",
+    "format:biome": "npx @biomejs/biome format --write ./src",
+    "pub": "npm run build && npm version patch --no-git-tag-version && npm publish --no-git-checks"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.17.32",
+    "esbuild": "^0.20.1",
+    "esbuild-plugin-wasm": "^1.1.0",
+    "esbuild-register": "^3.5.0",
+    "eslint": "^8.57.0",
+    "nodemon": "^3.1.0",
+    "typescript": "^5.8.3"
+  }
+}

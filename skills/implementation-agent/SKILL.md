@@ -6,6 +6,23 @@ description: Implements tracker subtasks tagged `implement`, publishes/updates t
 
 # Implementation Agent
 
+## Open Orchestra Settings
+
+Before doing anything else, look for `orchestra-settings.json` in the current workspace or repository root.
+
+- If the file exists, treat it as the workflow source of truth.
+- Read `workflow.sequence` to understand the expected stage order.
+- Read `workflow.agents.implementation-agent` to determine:
+  - `dependsOn`: agents that must be complete before this agent runs.
+  - `next`: the next agent to hand off to.
+  - `invocation`: whether the next agent should be invoked automatically (`auto`) or left for the user to invoke manually (`manual`).
+- If `dependsOn` lists agents that are not complete yet, stop and report that implementation is blocked by workflow configuration.
+- When this agent finishes, hand off only to the configured `next` agent.
+- If `invocation` is `manual`, do not auto-invoke the next agent; leave a clear handoff for the user.
+- If the file does not exist, use the built-in default flow:
+  `planning-agent -> implementation-agent -> pr-review-agent`, with automatic handoff from implementation to PR review.
+- Any future custom agent added by the user must be respected if it appears in `orchestra-settings.json`; do not assume the core three-agent workflow is exhaustive.
+
 ## Purpose
 
 Implement the parent issue by executing planned implementation subtasks and handling PR publication in the same run with token-efficient context loading and auditable stage handoff.
@@ -121,7 +138,7 @@ Implement the parent issue by executing planned implementation subtasks and hand
 - Add concise parent issue comment with PR URL and short review request.
 - Move parent issue status to `In review`.
 - Post handoff JSON with `to_skill: pr-review-agent` and `status: ready`.
-13. Invoke `pr-review-agent` with the same parent issue ID unless `open-implementation-questions` is present.
+13. If `open-implementation-questions` is not present and `orchestra-settings.json` allows automatic handoff, invoke the configured `next` agent with the same parent issue ID. Otherwise stop after leaving the handoff for the user.
 
 ## Guardrails
 
@@ -138,4 +155,4 @@ Implement the parent issue by executing planned implementation subtasks and hand
 
 ## Handoff
 
-Primary consumer: `pr-review-agent` (auto-invoke when unblocked).
+Primary consumer: the `next` agent configured for `implementation-agent` in `orchestra-settings.json`; default is `pr-review-agent`.

@@ -6,6 +6,24 @@ description: Runs a diff-first PR review with handoff-first context loading, laz
 
 # PR Review Agent
 
+## Open Orchestra Settings
+
+Before doing anything else, look for `orchestra-settings.json` in the current workspace or repository root.
+
+- If the file exists, treat it as the workflow source of truth.
+- Read `workflow.sequence` to understand the expected stage order.
+- Read `workflow.agents.pr-review-agent` to determine:
+  - `dependsOn`: agents that must be complete before this agent runs.
+  - `next`: the next agent to hand off to.
+  - `invocation`: whether the next agent should be invoked automatically (`auto`) or left for the user to invoke manually (`manual`).
+- If `dependsOn` lists agents that are not complete yet, stop and report that PR review is blocked by workflow configuration.
+- When this agent finishes, hand off only to the configured `next` agent.
+- If `next` is `null`, treat the workflow as complete unless the settings file defines a different continuation outside this agent.
+- If `invocation` is `manual`, do not auto-invoke the next agent; leave a clear handoff for the user.
+- If the file does not exist, use the built-in default flow:
+  `planning-agent -> implementation-agent -> pr-review-agent`, with PR review as the terminal step.
+- Any future custom agent added by the user must be respected if it appears in `orchestra-settings.json`; do not assume the core three-agent workflow is exhaustive.
+
 ## Purpose
 
 Run a focused PR review that starts from changed code, validates only relevant requirements/spec sections, and reports blocking risks with minimal token use.
@@ -138,8 +156,8 @@ Run a focused PR review that starts from changed code, validates only relevant r
 14. If required code changes are found and review is not blocked:
 - Remove `open-pr-review-questions` if present.
 - Set issue status to `In Progress`.
-- Post handoff JSON with `to_skill: implementation-agent`, `status: ready`, and `next_guidance.findings` populated.
-- Invoke `implementation-agent` with the same parent issue ID.
+- Post handoff JSON with `to_skill` set to the configured `next` agent (default `implementation-agent`), `status: ready`, and `next_guidance.findings` populated.
+- If `orchestra-settings.json` allows automatic handoff, invoke the configured `next` agent with the same parent issue ID. Otherwise stop after leaving the handoff for the user.
 15. If no required changes remain:
 - Remove `open-pr-review-questions` if present.
 - Add tag `pr-reviewed`.
@@ -160,4 +178,4 @@ Run a focused PR review that starts from changed code, validates only relevant r
 
 ## Handoff
 
-Primary consumer: `implementation-agent` for fixes; review completes with `to_skill: none` when clean.
+Primary consumer: the `next` agent configured for `pr-review-agent` in `orchestra-settings.json`; default is `none` when review is clean and `implementation-agent` when fixes are required.
